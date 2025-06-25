@@ -3,7 +3,8 @@ import {
   GenerationRequest,
   GenerationResponse,
   ProgressResponse,
-  SamplerItem
+  SamplerItem,
+  ModelInfo
 } from '../types/api';
 
 // Usar URLs relativas para aproveitar o proxy do React
@@ -14,6 +15,7 @@ const TEXT_TO_IMG_ENDPOINT = '/sdapi/v1/txt2img';
 const PROGRESS_ENDPOINT = '/sdapi/v1/progress';
 const INTERRUPT_ENDPOINT = '/sdapi/v1/interrupt';
 const SAMPLERS_ENDPOINT = '/sdapi/v1/samplers';
+const MODELS_ENDPOINT = '/sdapi/v1/sd-models';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -107,6 +109,19 @@ export class StableDiffusionApi {
     } catch (error) {
       console.error('API Health Check Failed:', error);
       return false;
+    }
+  }
+
+  /**
+   * Obtém a lista de modelos/checkpoints disponíveis.
+   */
+  static async getModels(): Promise<ModelInfo[]> {
+    try {
+      const response: AxiosResponse<ModelInfo[]> = await apiClient.get(MODELS_ENDPOINT);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting models:', error);
+      throw error;
     }
   }
 } 

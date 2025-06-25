@@ -4,7 +4,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { StableDiffusionApi } from '../services/stableDiffusionApi';
-import { GenerationRequest, SamplerItem } from '../types/api';
+import { GenerationRequest, SamplerItem, ModelInfo } from '../types/api';
 import { useImageHistory } from '../hooks/useImageHistory';
 import { convertToGeneratedImage } from '../utils/imageUtils';
 
@@ -207,6 +207,20 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
   const [error, setError] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [samplers, setSamplers] = useState<SamplerItem[]>([]);
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string>('');
+
+  // Presets de proporção
+  const ratioPresets = [
+    { label: 'SD 1.5 (512x512)', width: 512, height: 512 },
+    { label: 'SDXL 1024x1024', width: 1024, height: 1024 },
+    { label: 'SDXL 832x1216', width: 832, height: 1216 },
+    { label: 'SDXL 1216x832', width: 1216, height: 832 },
+    { label: 'Flux 768x1344', width: 768, height: 1344 },
+    { label: 'Flux 1344x768', width: 1344, height: 768 },
+    { label: 'Portrait (9:16)', width: 704, height: 1216 },
+    { label: 'Landscape (16:9)', width: 1216, height: 704 },
+  ];
 
   // Carregar samplers na inicialização
   useEffect(() => {
@@ -220,6 +234,20 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
     };
 
     loadSamplers();
+  }, []);
+
+  // Carregar modelos/checkpoints
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const modelsData = await StableDiffusionApi.getModels();
+        setModels(modelsData);
+        if (modelsData.length > 0) setSelectedModel(modelsData[0].model_name);
+      } catch (error) {
+        console.error('Erro ao carregar modelos:', error);
+      }
+    };
+    loadModels();
   }, []);
 
   // Monitorar progresso durante a geração
@@ -346,27 +374,34 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
 
         <Row>
           <FormGroup>
-            <Label>Largura</Label>
-            <Input
-              type="number"
-              value={width}
-              onChange={(e) => setWidth(parseInt(e.target.value))}
-              min={64}
-              max={2048}
-              step={64}
-            />
+            <Label>Modelo/Checkpoint</Label>
+            <Select
+              value={selectedModel}
+              onChange={e => setSelectedModel(e.target.value)}
+            >
+              {models.map(model => (
+                <option key={model.model_name} value={model.model_name}>
+                  {model.title}
+                </option>
+              ))}
+            </Select>
           </FormGroup>
           
           <FormGroup>
-            <Label>Altura</Label>
-            <Input
-              type="number"
-              value={height}
-              onChange={(e) => setHeight(parseInt(e.target.value))}
-              min={64}
-              max={2048}
-              step={64}
-            />
+            <Label>Proporção (Preset)</Label>
+            <Select
+              value={`${width}x${height}`}
+              onChange={e => {
+                const [w, h] = e.target.value.split('x').map(Number);
+                setWidth(w);
+                setHeight(h);
+              }}
+            >
+              {ratioPresets.map(preset => (
+                <option key={preset.label} value={`${preset.width}x${preset.height}`}>{preset.label}</option>
+              ))}
+              <option value={`${width}x${height}`}>Personalizado: {width}x{height}</option>
+            </Select>
           </FormGroup>
         </Row>
 
