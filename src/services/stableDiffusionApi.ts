@@ -6,7 +6,8 @@ import {
   SamplerItem
 } from '../types/api';
 
-const API_BASE_URL = 'http://192.168.3.70:7861';
+// Usar URLs relativas para aproveitar o proxy do React
+const API_BASE_URL = '';
 
 // Endpoints da API AUTOMATIC1111
 const TEXT_TO_IMG_ENDPOINT = '/sdapi/v1/txt2img';
