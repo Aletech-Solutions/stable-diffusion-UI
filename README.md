@@ -24,7 +24,7 @@ Um frontend moderno em React para interagir com a API do Stable Diffusion, permi
 
 - **Node.js** 16+ 
 - **npm** ou **yarn**
-- **Stable Diffusion WebUI** rodando em `http://192.168.3.70:7861`
+- **Stable Diffusion WebUI** rodando em `http://localhost:7861`
 
 ## 🛠️ Instalação
 
@@ -93,7 +93,7 @@ npm start
 
 A aplicação está configurada para conectar com a API do Stable Diffusion em:
 ```
-http://192.168.3.70:7861
+http://localhost:7861
 ```
 
 Para alterar esta configuração, edite o arquivo `src/services/stableDiffusionApi.ts`:
