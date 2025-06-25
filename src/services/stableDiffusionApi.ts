@@ -6,7 +6,7 @@ import {
   SamplerItem
 } from '../types/api';
 
-const API_BASE_URL = 'http://0.0.0.0:7861';
+const API_BASE_URL = 'http://192.168.3.70:7861';
 
 // Endpoints da API AUTOMATIC1111
 const TEXT_TO_IMG_ENDPOINT = '/sdapi/v1/txt2img';
