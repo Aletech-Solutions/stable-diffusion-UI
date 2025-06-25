@@ -4,7 +4,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { StableDiffusionApi } from '../services/stableDiffusionApi';
-import { GenerationRequest, SamplerItem, ModelInfo } from '../types/api';
+import { GenerationRequest, SamplerItem, ModelInfo, LoraModel } from '../types/api';
 import { useImageHistory } from '../hooks/useImageHistory';
 import { convertToGeneratedImage } from '../utils/imageUtils';
 
@@ -209,6 +209,7 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
   const [samplers, setSamplers] = useState<SamplerItem[]>([]);
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>('');
+  const [loras, setLoras] = useState<LoraModel[]>([]);
 
   // Presets de proporção
   const ratioPresets = [
@@ -248,6 +249,19 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
       }
     };
     loadModels();
+  }, []);
+
+  // Carregar Loras
+  useEffect(() => {
+    const loadLoras = async () => {
+      try {
+        const lorasData = await StableDiffusionApi.getLoras();
+        setLoras(lorasData);
+      } catch (error) {
+        console.error('Erro ao carregar Loras:', error);
+      }
+    };
+    loadLoras();
   }, []);
 
   // Monitorar progresso durante a geração
@@ -347,6 +361,11 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
 
   const generateRandomSeed = () => {
     setSeed(Math.floor(Math.random() * 2147483647));
+  };
+
+  // Função para inserir Lora no prompt
+  const handleAddLoraToPrompt = (lora: LoraModel, offset: number = 1) => {
+    setPrompt(prev => prev + ` <lora:${lora.name}:${offset}>`);
   };
 
   return (
@@ -479,6 +498,27 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageGenerated
             </Button>
           </div>
         </FormGroup>
+
+        {/* Loras */}
+        {loras.length > 0 && (
+          <FormGroup>
+            <Label>Loras disponíveis</Label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {loras.map(lora => (
+                <Button
+                  key={lora.name}
+                  type="button"
+                  variant="secondary"
+                  style={{ fontSize: 12, padding: '4px 10px' }}
+                  onClick={() => handleAddLoraToPrompt(lora, 1)}
+                  title={`Adicionar <lora:${lora.name}:1> ao prompt`}
+                >
+                  {lora.alias || lora.name}
+                </Button>
+              ))}
+            </div>
+          </FormGroup>
+        )}
 
         {isGenerating && (
           <>

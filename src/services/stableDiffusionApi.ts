@@ -4,7 +4,8 @@ import {
   GenerationResponse,
   ProgressResponse,
   SamplerItem,
-  ModelInfo
+  ModelInfo,
+  LoraModel
 } from '../types/api';
 
 // Usar URLs relativas para aproveitar o proxy do React
@@ -16,6 +17,7 @@ const PROGRESS_ENDPOINT = '/sdapi/v1/progress';
 const INTERRUPT_ENDPOINT = '/sdapi/v1/interrupt';
 const SAMPLERS_ENDPOINT = '/sdapi/v1/samplers';
 const MODELS_ENDPOINT = '/sdapi/v1/sd-models';
+const LORAS_ENDPOINT = '/sdapi/v1/loras';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -121,6 +123,19 @@ export class StableDiffusionApi {
       return response.data;
     } catch (error) {
       console.error('Error getting models:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtém a lista de Loras disponíveis.
+   */
+  static async getLoras(): Promise<LoraModel[]> {
+    try {
+      const response: AxiosResponse<LoraModel[]> = await apiClient.get(LORAS_ENDPOINT);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting loras:', error);
       throw error;
     }
   }
